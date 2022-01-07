@@ -1,5 +1,4 @@
-#ifndef LIST_POOL_H
-#define LIST_POOL_H
+#pragma once
 
 #include <algorithm>
 #include <iostream>
@@ -162,4 +161,4 @@ class list_pool{
     
 };
 
-#endif
+
