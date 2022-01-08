@@ -5,8 +5,42 @@
 #include <iterator>
 #include <vector>
 #include <stdlib.h>
+#include <utility>
 
+//****************************************************************************************
+template <typename pooltype, typename node, typename T>
+class class_iterator {
+	pooltype* pool;
+	node current;
 
+   public:
+	using value_type = T;
+	using reference = value_type&;
+	
+
+	explicit class_iterator(pooltype* p, node x)  : pool{p}, current{x} {}
+
+	reference operator*() const  { return (*pool)[current - 1].value; }
+
+	
+	class_iterator operator++(int) {
+		auto tmp = *this;
+		++(*this);
+		return tmp;
+	}
+	
+	class_iterator& operator++() {
+		current = (*pool)[current - 1].next;
+		return *this;
+	}
+
+	friend bool operator==(const class_iterator& x, const class_iterator& y) {
+		return (*x.pool)[x.current-1].value == (*y.pool)[y.current-1].value;
+	}
+
+	friend bool operator!=(const class_iterator& x, const class_iterator& y) { return !(x == y); }
+};
+//*********************************************************************
 using namespace std;
 template<typename T, typename N=size_t>
 class list_pool{
@@ -96,14 +130,54 @@ class list_pool{
             return head;
         }
     }
-
+    
 //**********************************************************
+	using iterator = class_iterator<vector<node_t>, list_type, value_type>;
+	using const_iterator = class_iterator<vector<node_t>, list_type, const value_type>;
+
+
+	iterator begin(list_type x) 
+	{
+	 return iterator(&pool, x); 
+	 }
+	
+	iterator end(list_type ) 
+	{ 
+	return iterator(&pool, end()); 
+	}
+
+	const_iterator begin(list_type x) const 
+	{
+	 return const_iterator(&pool, x); 
+	}
+	const_iterator end(list_type ) const 
+	{
+	return const_iterator(&pool, end()); 
+	}
+	const_iterator cbegin(list_type x) const 
+	{ 
+	return const_iterator(&pool, x); 
+	}
+	const_iterator cend(list_type ) const 
+	{ 
+	return const_iterator(&pool, end()); 
+	}
+        void reserve(size_type n) { pool.reserve(n); }
+
+	size_type capacity() const 
+	{ 
+	return pool.capacity(); 
+	}
+        size_type size() const 
+        { 
+        return pool.size(); 
+        }
 
     T& value(list_type x)
     {
     	return node(x).value;
     }
-
+   
     list_type& next(list_type x)
     {
      	return node(x).next;
@@ -123,6 +197,8 @@ class list_pool{
     {
       return x==end();
     }
+    
+ 
     
 //**************************************************************
     list_type free(list_type x) 
@@ -158,7 +234,7 @@ class list_pool{
         return end();
   } 
   
+ 
     
 };
-
 
