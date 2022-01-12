@@ -83,22 +83,31 @@ class list_pool{
     }
 
  //****************************************************
-    list_type push_front(value_type&& val, list_type head){
-         if(free_node_list==0)
-         { 
-            value(index)=forward<value_type>(val);
-            return index;
-        }
-        else
-        {
-        auto  temp = free_node_list;
-        free_node_list=next(free_node_list);
-        value(temp)=forward<value_type>(val);     
-        next(temp)=head;     
-        return temp;
-            
-        }
-    }
+   list_type push_front(const T& val, list_type head)
+	 { 
+		return _push_front(val, head); 
+		}
+	list_type push_front(T&& val, list_type head)
+	{ 
+		return _push_front(std::move(val), head);
+		 }		
+	
+	list_type _push_front(T&& val, list_type head){
+		
+		node_t Node{val, head};
+
+		if(free_node_list == 0)
+		{
+			pool.push_back(Node);	
+		}
+		else
+		{
+			auto head_new = free_node_list;
+			free_node_list = next(free_node_list);
+			value(head_new) = std::forward<value_type>(val);
+		}
+		return pool.size();
+	}
 
 //******************************************************************
     list_type push_back(value_type&& val, list_type head)
