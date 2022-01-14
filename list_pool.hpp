@@ -131,7 +131,6 @@ class list_pool{
 					pool.push_back(Node);	
 					tmp3 = pool.size();
 				}else{
-				free_node_list = next(free_node_list);
 				pool[tmp2 - 1] = Node;
 				tmp3 = tmp2;
 			}
