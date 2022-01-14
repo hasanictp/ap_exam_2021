@@ -10,6 +10,7 @@
 //****************************************************************************************
 template <typename pooltype, typename node, typename T>
 class class_iterator {
+   private:		
 	pooltype* pool;
 	node current;
 
@@ -35,7 +36,7 @@ class class_iterator {
 	}
 
 	friend bool operator==(const class_iterator& x, const class_iterator& y) {
-		return (*x.pool)[x.current-1].value == (*y.pool)[y.current-1].value;
+		return x.current == y.current;
 	}
 
 	friend bool operator!=(const class_iterator& x, const class_iterator& y) { return !(x == y); }
@@ -44,20 +45,16 @@ class class_iterator {
 using namespace std;
 template<typename T, typename N=size_t>
 class list_pool{
-    public:
+    private:
     
        typedef T value_type;
        typedef N list_type;
-       
- 
+
     struct node_t{
         value_type value;
         list_type next;
     };
     vector<node_t> pool;
-
-  //  using list_type = N;
-   // using value_type = T;
    
     using size_type = typename vector<node_t>::size_type;
 
@@ -89,7 +86,7 @@ class list_pool{
 		}
 	list_type push_front(T&& val, list_type head)
 	{ 
-		return _push_front(std::move(val), head);
+		return _push_front(move(val), head);
 		 }		
 	
 	list_type _push_front(T&& val, list_type head){
@@ -104,41 +101,45 @@ class list_pool{
 		{
 			auto head_new = free_node_list;
 			free_node_list = next(free_node_list);
-			value(head_new) = std::forward<value_type>(val);
+			value(head_new) = forward<value_type>(val);
 		}
 		return pool.size();
 	}
 
 //******************************************************************
-    list_type push_back(value_type&& val, list_type head)
-    {
-       list_type temp{head};
-        if(head == 0)
-        {   
-        
-        value(index)=val;
-        return index;
-        
-        }
-        while(next(temp)!=0)
-        {
-            temp=next(temp);
-        }
-        if(free_node_list==0)
-        {
-         
-         index++;
-         next(temp)=index;
-         value(index)=forward<value_type>(val);
-         next(index)=end();
-         
-         return head;
-        }
-        else
-        {
-            return head;
-        }
-    }
+   list_type push_back(const T& val, list_type head)
+	{ 
+		return _push_back(val, head); 
+		}
+	list_type push_back(T&& val, list_type head)
+	{ 
+		return _push_back(move(val), head);
+		 }
+    
+	list_type _push_back(T&& val, list_type head){
+
+		if (head==0) {
+			return push_front(forward<T>(val), head);
+		}
+		else{      	
+				auto tmp1=1,tmp2 = free_node_list,tmp3 = 0;
+				while(next(tmp1) != 0){
+					tmp1 = next(tmp1);
+				}
+				node_t Node{val, 0};
+				if(free_node_list == 0){
+					pool.push_back(Node);	
+					tmp3 = pool.size();
+				}else{
+				free_node_list = next(free_node_list);
+				pool[tmp2 - 1] = Node;
+				tmp3 = tmp2;
+			}
+		     next(head) = tmp3;
+		}	
+		return head;
+	}
+	
     
 //**********************************************************
 	using iterator = class_iterator<vector<node_t>, list_type, value_type>;
@@ -212,38 +213,30 @@ class list_pool{
 //**************************************************************
     list_type free(list_type x) 
     {
-        if(x!=end())
-        {
-        	auto temp=node(x).next;
-                return temp;
-        	
+        if(x!=0){
+	auto temp=node(x).next;
+        return temp;	
 	}
-	else
-	{
-       		return x;
+	else{
+	return x;
     	}
-    }
-    
+     }
+  
   list_type free_list(list_type temp)
   {
-	if(free_node_list)
+	if(free_node_list !=0)
 	{
-		 while (node(temp).next)	
-   	   	{
+		 while (node(temp).next){
    			temp = node(temp).next;
 	   	}
    
     	return temp;
 	}
-	else
-	{
-		free_node_list=temp;
+	else{
+	free_node_list=temp;
 	}
 	
-        return end();
-  } 
-  
- 
-    
+       return end();
+  }     
 };
 
